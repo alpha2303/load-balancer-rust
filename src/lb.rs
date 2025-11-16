@@ -2,8 +2,10 @@ use std::borrow::Cow;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 
+use super::route_scheduler::RouteScheduler;
 use super::thread_pool::ThreadPool;
 
+#[derive(Debug)]
 struct StreamHandler {
     stream: TcpStream,
 }
@@ -34,19 +36,23 @@ impl StreamHandler {
     }
 }
 
+#[derive(Debug)]
 pub struct LoadBalancer {
     listener: TcpListener,
     thread_pool: ThreadPool,
+    route_scheduler: RouteScheduler,
 }
 
 impl LoadBalancer {
-    pub fn new(address: &str) -> Result<Self, std::io::Error> {
+    pub fn new(address: &str, server_host_list: Vec<&'static str>) -> Result<Self, std::io::Error> {
         let listener = TcpListener::bind(address).unwrap();
+        let route_scheduler = RouteScheduler::new(server_host_list);
         let thread_pool: ThreadPool = ThreadPool::new(4).unwrap();
 
         Ok(LoadBalancer {
             listener,
             thread_pool,
+            route_scheduler,
         })
     }
 

@@ -22,6 +22,7 @@ impl fmt::Display for ThreadPoolError {
 
 type Job = Box<dyn FnOnce() + Send + 'static>;
 
+#[derive(Debug)]
 struct Worker {
     id: usize,
     thread: thread::JoinHandle<()>,
@@ -43,6 +44,7 @@ impl Worker {
     }
 }
 
+#[derive(Debug)]
 pub struct ThreadPool {
     workers: Vec<Worker>,
     sender: mpsc::Sender<Job>,
